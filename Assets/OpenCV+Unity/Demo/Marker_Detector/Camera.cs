@@ -18,7 +18,8 @@ public class Camera : WebCamera
         if(output == null)
         {
             output = OpenCvSharp.Unity.MatToTexture(image);
-        }
+			QRGeneration.GenerateQR();
+		}
         else
         {
 			// Create default parameres for detection
@@ -50,7 +51,7 @@ public class Camera : WebCamera
 			RawImage rawImage = gameObject.GetComponent<RawImage>();
 			rawImage.texture = outputTexture;
 			OpenCvSharp.Unity.MatToTexture(mat, output);
-        }
+		}
 
         return true;
     }
