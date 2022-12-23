@@ -11,7 +11,6 @@ public class Camera : WebCamera
     protected override bool ProcessTexture(WebCamTexture input, ref Texture2D output)
     {
         image = OpenCvSharp.Unity.TextureToMat(input);
-        QRGeneration.GenerateQR();
 
         // Sik sik Marker tanýma Þeysileri
 
@@ -37,6 +36,7 @@ public class Camera : WebCamera
 
             // Convert image to grasyscale
             Mat grayMat = new Mat();
+
             Cv2.CvtColor(mat, grayMat, ColorConversionCodes.BGR2GRAY);
 
             // Detect and draw markers
@@ -52,7 +52,10 @@ public class Camera : WebCamera
 
             OpenCvSharp.Unity.MatToTexture(mat, output);
 
-            QRGeneration.GeneratePaddedImage(output);
+            //QRGeneration.GeneratePaddedImage(output, out Texture2D padded);
+            //QRGeneration.GenerateQR(out Mat SolUstQR, out Mat SagUstQR, out Mat SolAltQR, out Mat SagAltQR);
+
+            //QRGeneration.EmbedQRIntoImage(SolUstQR, SagUstQR, SolAltQR, SagAltQR, padded);
         }
 
         return true;
