@@ -101,7 +101,7 @@ namespace OpenCvSharp.Aruco
             dictionary.ThrowIfDisposed();
             mat.ThrowIfNotReady();
 
-            NativeMethods.aruco_drawMarker(dictionary.CvPtr, id, sidePixels, mat.CvPtr, borderBits);
+            NativeMethods.aruco_drawMarker(dictionary.ptrObj.CvPtr, id, sidePixels, mat.CvPtr, borderBits);
             mat.Fix();
             GC.KeepAlive(dictionary);
         }
