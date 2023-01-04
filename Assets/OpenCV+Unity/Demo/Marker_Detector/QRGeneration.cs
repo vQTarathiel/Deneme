@@ -1,13 +1,8 @@
 namespace OpenCvSharp.Demo
 {
-    using System.Collections;
-    using System.Collections.Generic;
     using UnityEngine;
     using OpenCvSharp;
     using OpenCvSharp.Aruco;
-    using UnityEngine.UI;
-    using System.Drawing;
-    using SixLabors.ImageSharp;
     using System.IO;
     using System;
 
@@ -16,12 +11,12 @@ namespace OpenCvSharp.Demo
         public static void GenerateQR(out Mat M1, out Mat M2, out Mat M3, out Mat M4)
         {
             // Uygulamamýzý Çalaný Sikeriz Bu yüzden üst 2 QR kodu 34 06 yaptýk aq (pis siqerler)
-            Dictionary dictionary = CvAruco.GetPredefinedDictionary(PredefinedDictionaryName.DictArucoOriginal);
+            Dictionary dictionary = CvAruco.GetPredefinedDictionary(PredefinedDictionaryName.Dict4X4_1000);
             Mat UstSolQR = new();
             Mat UstSagQR = new();
 
-            CvAruco.DrawMarker(dictionary, 34, 50, UstSolQR);
-            CvAruco.DrawMarker(dictionary, 6, 50, UstSagQR);
+            CvAruco.DrawMarker(dictionary, 34, 60, UstSolQR);
+            CvAruco.DrawMarker(dictionary, 6, 60, UstSagQR);
 
             //Alttaki 2 QR kod ise albümün QR kodlarý olacak burda SQL kullanacaz
             Mat SolAltQR = new();
@@ -30,22 +25,27 @@ namespace OpenCvSharp.Demo
             var id1 = 293;  //TODO: Veri Tabanýndan alýnan ID atanacak
             var id2 = 31;   //TODO: Veri Tabanýndan alýnan ID atanacak
 
-            CvAruco.DrawMarker(dictionary, id1, 50, SolAltQR);
-            CvAruco.DrawMarker(dictionary, id2, 50, SagAltQR);
+            CvAruco.DrawMarker(dictionary, id1, 60, SolAltQR);
+            CvAruco.DrawMarker(dictionary, id2, 60, SagAltQR);
 
-            M1 = UstSolQR;
-            M2 = UstSagQR;
-            M3 = SolAltQR;
-            M4 = SagAltQR;
+            GeneratePaddedImage(Unity.MatToTexture(UstSolQR), out Texture2D UstSolT);
+            GeneratePaddedImage(Unity.MatToTexture(UstSagQR), out Texture2D UstSagT);
+            GeneratePaddedImage(Unity.MatToTexture(SagAltQR), out Texture2D AltSagT);
+            GeneratePaddedImage(Unity.MatToTexture(SolAltQR), out Texture2D AltSolT);
+
+            M1 = Unity.TextureToMat(UstSolT);
+            M2 = Unity.TextureToMat(UstSagT);
+            M3 = Unity.TextureToMat(AltSolT);
+            M4 = Unity.TextureToMat(AltSagT);
         }
         public static void GeneratePaddedImage(Texture2D input, out Texture2D image)
         {
             var PaddedImage = input.Clone();
 
-            PaddedImage.Reinitialize(input.width + 100, input.height + 100);
+            PaddedImage.Reinitialize(input.width + 8, input.height + 8);
             
             var borderColor = new UnityEngine.Color(1, 1, 1, 1);
-            var borderWidth = 55;
+            var borderWidth = 4;
 
             for (var x = 0; x < PaddedImage.width; x++) {
                 for (var y = 0; y < PaddedImage.height; y++) {
@@ -75,42 +75,45 @@ namespace OpenCvSharp.Demo
             var x1 = 0;
             var y1 = 0;
 
-            for (var x = 2; x < 52; x++) {
-                for (var y = 2; y < 52; y++) {
-                    image.SetPixel(x, y, solUstT.GetPixel(x, y));
-                }
-            }
-
-            for (var x = image.width - 52; x < image.width - 2; x++)
-            {
+            for (var x = 2; x < 70; x++) {
                 y1 = 0;
-                for (var y = 2; y < 52; y++)
-                {
-                    image.SetPixel(x, y, sagUstT.GetPixel(x1, y1));
-                    y1++;
-                }
-                x1++;
-            }
-
-            x1 = 0;
-            for (var x = 2; x < 52; x++)
-            {
-                y1 = 0;
-                for (var y = image.height - 52; y < image.height - 2; y++)
-                {
+                for (var y = 2; y < 70; y++) {
                     image.SetPixel(x, y, solAltT.GetPixel(x1, y1));
                     y1++;
                 }
                 x1++;
             }
 
-            x1 = 0;
-            for (var x = image.width - 52; x < image.width - 2; x++)
+            for (var x = image.width - 70; x < image.width - 2; x++)
             {
                 y1 = 0;
-                for (var y = image.height - 52; y < image.height - 2; y++)
+                for (var y = 2; y < 70; y++)
                 {
                     image.SetPixel(x, y, sagAltT.GetPixel(x1, y1));
+                    y1++;
+                }
+                x1++;
+            }
+
+            x1 = 0;
+            for (var x = 2; x < 70; x++)    //Sol Üstü Kontrol Ediyo
+            {
+                y1 = 0;
+                for (var y = image.height - 70; y < image.height - 2; y++)
+                {
+                    image.SetPixel(x, y, solUstT.GetPixel(x1, y1));
+                    y1++;
+                }
+                x1++;
+            }
+
+            x1 = 0;
+            for (var x = image.width - 70; x < image.width - 2; x++)
+            {
+                y1 = 0;
+                for (var y = image.height - 70; y < image.height - 2; y++)
+                {
+                    image.SetPixel(x, y, sagUstT.GetPixel(x1, y1));
                     y1++;
                 }
                 x1++;
@@ -119,7 +122,7 @@ namespace OpenCvSharp.Demo
             image.Apply();
             ImageSaving(image);
         }
-        private static void ImageSaving(Texture2D input)
+        public static void ImageSaving(Texture2D input)
         {
             var dirPath = Application.persistentDataPath + "/../Assets/OpenCV+Unity/Demo/Marker_Detector/SaveImages/";
             if (!Directory.Exists(dirPath))

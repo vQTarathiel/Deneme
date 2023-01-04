@@ -11,6 +11,7 @@ public class Camera : WebCamera
     protected override bool ProcessTexture(WebCamTexture input, ref Texture2D output)
     {
         image = OpenCvSharp.Unity.TextureToMat(input);
+        Resources.UnloadUnusedAssets();
 
         // Sik sik Marker tanýma Þeysileri
 
@@ -20,11 +21,13 @@ public class Camera : WebCamera
         }
         else
         {
+            output.hideFlags = HideFlags.HideAndDontSave;
+            
             // Create default parameres for detection
             DetectorParameters detectorParameters = DetectorParameters.Create();
 
             // Dictionary holds set of all available markers
-            Dictionary dictionary = CvAruco.GetPredefinedDictionary(PredefinedDictionaryName.DictArucoOriginal);
+            Dictionary dictionary = CvAruco.GetPredefinedDictionary(PredefinedDictionaryName.Dict4X4_1000);
 
             // Variables to hold results
             Point2f[][] corners;
@@ -35,13 +38,15 @@ public class Camera : WebCamera
             Mat mat = image;
 
             // Convert image to grasyscale
-            Mat grayMat = new Mat();
+            //Mat grayMat = new Mat();
 
-            Cv2.CvtColor(mat, grayMat, ColorConversionCodes.BGR2GRAY);
+            //Cv2.CvtColor(mat, grayMat, ColorConversionCodes.BGR2GRAY);
 
             // Detect and draw markers
-            CvAruco.DetectMarkers(grayMat, dictionary, out corners, out ids, detectorParameters, out rejectedImgPoints);
-            CvAruco.DrawDetectedMarkers(mat, corners, ids);
+            //CvAruco.DetectMarkers(grayMat, dictionary, out corners, out ids, detectorParameters, out rejectedImgPoints);
+            //CvAruco.DrawDetectedMarkers(mat, corners, ids);
+
+            DrawImageAR.DrawAR(mat, out corners, out ids);
 
             // Create Unity output texture with detected markers
             Texture2D outputTexture = OpenCvSharp.Unity.MatToTexture(mat);
@@ -53,9 +58,9 @@ public class Camera : WebCamera
             OpenCvSharp.Unity.MatToTexture(mat, output);
 
             //QRGeneration.GeneratePaddedImage(output, out Texture2D padded);
+            
             //QRGeneration.GenerateQR(out Mat SolUstQR, out Mat SagUstQR, out Mat SolAltQR, out Mat SagAltQR);
-
-            //QRGeneration.EmbedQRIntoImage(SolUstQR, SagUstQR, SolAltQR, SagAltQR, padded);
+            //QRGeneration.EmbedQRIntoImage(SolUstQR, SagUstQR, SolAltQR, SagAltQR, output);
         }
 
         return true;
