@@ -14,24 +14,25 @@ namespace OpenCvSharp.Demo
             Dictionary dictionary = CvAruco.GetPredefinedDictionary(PredefinedDictionaryName.Dict4X4_1000);
             Mat UstSolQR = new();
             Mat UstSagQR = new();
+            Mat AltSolQR = new();
+            Mat AltSagQR = new();
 
             CvAruco.DrawMarker(dictionary, 34, 60, UstSolQR);
-            CvAruco.DrawMarker(dictionary, 6, 60, UstSagQR);
+            CvAruco.DrawMarker(dictionary, 6, 60, AltSagQR);
 
             //Alttaki 2 QR kod ise albümün QR kodlarý olacak burda SQL kullanacaz
-            Mat SolAltQR = new();
-            Mat SagAltQR = new();
+            
 
             var id1 = 293;  //TODO: Veri Tabanýndan alýnan ID atanacak
             var id2 = 31;   //TODO: Veri Tabanýndan alýnan ID atanacak
 
-            CvAruco.DrawMarker(dictionary, id1, 60, SolAltQR);
-            CvAruco.DrawMarker(dictionary, id2, 60, SagAltQR);
+            CvAruco.DrawMarker(dictionary, id1, 60, AltSolQR);
+            CvAruco.DrawMarker(dictionary, id2, 60, UstSagQR);
 
             GeneratePaddedImage(Unity.MatToTexture(UstSolQR), out Texture2D UstSolT);
             GeneratePaddedImage(Unity.MatToTexture(UstSagQR), out Texture2D UstSagT);
-            GeneratePaddedImage(Unity.MatToTexture(SagAltQR), out Texture2D AltSagT);
-            GeneratePaddedImage(Unity.MatToTexture(SolAltQR), out Texture2D AltSolT);
+            GeneratePaddedImage(Unity.MatToTexture(AltSagQR), out Texture2D AltSagT);
+            GeneratePaddedImage(Unity.MatToTexture(AltSolQR), out Texture2D AltSolT);
 
             M1 = Unity.TextureToMat(UstSolT);
             M2 = Unity.TextureToMat(UstSagT);
