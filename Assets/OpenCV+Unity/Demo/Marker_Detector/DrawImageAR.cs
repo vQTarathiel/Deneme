@@ -10,8 +10,9 @@
 
     public class DrawImageAR : MonoBehaviour
     {
-        private static void DrawImageOnMarker(Point2f[][] corners, int[] ids)
+        private static void DrawImageOnMarker(Mat mat, Point2f[][] corners, int[] ids)
         {
+            PicturePlane picturePlane = new();
             List<Point2f> avgOfCornersList = new List<Point2f> ();
             List<Point2f> SortedCorners = new List<Point2f>();
             foreach (var x in corners)
@@ -20,40 +21,16 @@
                 avgOfCornersList.Add(avaragePoint);
             }
 
-            image = cv2.imread('image.jpg');
-            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY);
-
-            //QR kodlu resmin kordinatları (warped)
-            points_A = np.float32([[320, 15], [700, 215], [85, 610], [530, 780]]);
-
-            //QR içine koyulacak resmin kordinatları
-            points_B = np.float32([[0, 0], [420, 0], [0, 594], [420, 594]]);
-
-            //Perspektifi hesaplayan fonksiyon
-            M = cv2.getPerspectiveTransform(points_A, points_B);
-            
-            //İçeri koyulacak resmin warp edilmesi
-            warped = cv2.warpPerspective(gray, M, (420, 594));
-
-            //Overlay edilmesi iki resmin
-            cv2.imshow('Original', image);
-            cv2.imshow('Warped', warped);
-            cv2.waitKey(0);
-            cv2.destroyAllWindows();
-
-
-            //resim üzerine yazılaacak fonk. yazılacak aqqqqqqqq
-
             int xOrt, yOrt;
-            xOrt = (int) Math.Round(avgOfCornersList[0].X + avgOfCornersList[1].X + avgOfCornersList[2].X + avgOfCornersList[3].X) / 4;
-            yOrt = (int) Math.Round(avgOfCornersList[0].Y + avgOfCornersList[1].Y + avgOfCornersList[2].Y + avgOfCornersList[3].Y) / 4;
+            xOrt = (int)Math.Round(avgOfCornersList[0].X + avgOfCornersList[1].X + avgOfCornersList[2].X + avgOfCornersList[3].X) / 4;
+            yOrt = (int)Math.Round(avgOfCornersList[0].Y + avgOfCornersList[1].Y + avgOfCornersList[2].Y + avgOfCornersList[3].Y) / 4;
 
             SortedCorners.Add(avgOfCornersList.Find(x => x.X < xOrt && x.Y > yOrt));
             SortedCorners.Add(avgOfCornersList.Find(x => x.X > xOrt && x.Y > yOrt));
             SortedCorners.Add(avgOfCornersList.Find(x => x.X < xOrt && x.Y < yOrt));
             SortedCorners.Add(avgOfCornersList.Find(x => x.X > xOrt && x.Y < yOrt));
 
-
+            picturePlane.MoveToPosition(SortedCorners);
         }
         public static void DrawAR(Mat mat, out Point2f[][] foundCorners, out int[] foundIds)
         {
@@ -71,8 +48,8 @@
 
             if (AppIDAuthentication(ids))
             {
-                DrawImageOnMarker(corners, ids);
-                CvAruco.DrawDetectedMarkers(mat, corners, ids);
+                DrawImageOnMarker(mat, corners, ids);
+                //CvAruco.DrawDetectedMarkers(mat, corners, ids);
             }
 
             foundCorners = corners;
@@ -90,6 +67,20 @@
             }
 
             return false;
+        }
+        private static Mat matImageFile(string filePath)
+        {
+            Mat matResult = null;
+            if (File.Exists(filePath))
+            {
+                // load into Mat type. Hack: workaround for Cv2.ImRead() being broke.
+                byte[] fileData = File.ReadAllBytes(filePath);
+                var tex = new Texture2D(2, 2);
+                tex.LoadImage(fileData); // this will auto-resize the 2,2 texture dimensions.
+                matResult = OpenCvSharp.Unity.TextureToMat(tex);
+                Cv2.CvtColor(matResult, matResult, ColorConversionCodes.BGR2GRAY);
+            }
+            return matResult;
         }
     }
 }
