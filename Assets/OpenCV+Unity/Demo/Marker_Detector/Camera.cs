@@ -13,11 +13,11 @@ public class Camera : WebCamera
         image = OpenCvSharp.Unity.TextureToMat(input);
         Resources.UnloadUnusedAssets();
 
-        // Sik sik Marker tanýma Þeysileri
-
         if (output == null)
         {
             output = OpenCvSharp.Unity.MatToTexture(image);
+            var obj = GameObject.Find("PicturePlane").GetComponent<Renderer>().material;
+            obj.mainTextureScale = new Vector2(obj.mainTextureScale.x, -obj.mainTextureScale.y);
         }
         else
         {
